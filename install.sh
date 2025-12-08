@@ -123,12 +123,10 @@ install_ctk() {
   # Add pyenv to PATH
   cecho "[*] Configuring pyenv PATH"
   if [[ -z "$PYENV_ROOT" ]] || ! grep -q "export PYENV_ROOT=" "$HOME/.bashrc"; then
-    echo "export PYENV_ROOT=\"$HOME/.pyenv\"" >> "$HOME/.bashrc"
+    echo "export PYENV_ROOT=\"\$HOME/.pyenv\"" >> "$HOME/.bashrc"
     echo "[[ -d \$PYENV_ROOT/bin ]] && export PATH=\"\$PYENV_ROOT/bin:\$PATH\"" >> "$HOME/.bashrc"
     echo "eval \"\$(pyenv init - bash)\"" >> "$HOME/.bashrc"
-    #export PYENV_ROOT="$HOME/.pyenv"
-    #export PATH="$PYENV_ROOT/bin:$PATH"
-    #eval "$(pyenv init - bash)"
+    echo "export PATH=\"$INSTALLATION_DIR/:\$PATH\"" >> "$HOME/.bashrc" # Add install dir to PATH
     cecho "[+] pyenv PATH configured"
   else
     cecho "[-] PYENV_ROOT already set, skipping PATH configuration"
@@ -201,8 +199,8 @@ install_ctk() {
   python3 $INSTALL_DIR/ctk.py update
   echo ""
   cecho "[*] Next steps:"
-  cecho "[*] 1. Initialize Copyparty conf: python3 cp-toolkit.py init"
-  cecho "[*] 2. Run Copyparty: python3 copyparty-sfx.py -c copyparty.conf"
+  cecho "[*] 1. Init config:             python3 cp-toolkit.py init"
+  cecho "[*] 2. Run Copyparty:           python3 copyparty-sfx.py -c copyparty.conf"
 }
 
 # If remove flag set, perform uninstall and exit
