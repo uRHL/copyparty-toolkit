@@ -142,7 +142,7 @@ install_ctk() {
   # Install python
   cecho "[*] Installing Python $PYTHON_VER with pyenv"
   pyenv install $PYTHON_VER
-  if [ $? -ne 1 ]; then
+  if [ $? -eq 1 ]; then
     cecho "[-] Python $PYTHON_VER already installed"
   elif [ $? -ne 0 ]; then
     cecho_err "[!] Failed to install Python $PYTHON_VER"
