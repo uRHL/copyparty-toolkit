@@ -112,7 +112,7 @@ install_ctk() {
   curl -fsSL https://pyenv.run | bash
   if [ $? -eq 127 ]; then
     cecho "[-] Package already installed"
-  else if [ $? -ne 0 ]; then
+  elif [ $? -ne 0 ]; then
     cecho_err "[!] Failed to install pyenv"
     exit 1
   else
