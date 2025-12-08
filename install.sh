@@ -98,15 +98,6 @@ install_ctk() {
   fi
   cecho "[+] System updated"
 
-  # Downloading Copyparty-Toolkit...
-  cecho "[*] Downloading Copyparty-Toolkit..."
-  git clone $REPO_URL "$INSTALL_DIR"
-  if [ $? -ne 0 ]; then
-    cecho_err "[!] Failed to download Copyparty-Toolkit"
-    exit 1
-  fi
-  cecho "[+] Copyparty-Toolkit downloaded successfully"
-
   # Install dependencies
   cecho "[*] Installing system dependencies"
   apt update && apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl git libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev python3.11-venv -y > /dev/null
@@ -119,11 +110,15 @@ install_ctk() {
   # Download pyenv
   cecho "[*] Installing pyenv"
   curl -fsSL https://pyenv.run | bash
-  if [ $? -ne 0 ]; then
+  if [ $? -eq 127 ]; then
+    cecho "[-] Package already installed"
+  else if [ $? -ne 0 ]; then
     cecho_err "[!] Failed to install pyenv"
     exit 1
+  else
+    cecho "[+] pyenv installed"
   fi
-  cecho "[+] pyenv installed"
+  
 
   # Add pyenv to PATH
   cecho "[*] Configuring pyenv PATH"
@@ -156,8 +151,8 @@ install_ctk() {
   # Create virtual env
   cecho "[*] Creating virtualenv '$PYTHON_ENV'"
   pyenv virtualenv $PYTHON_ENV
-  if [ $? -ne 0 ]; then
-    cecho_err "[!] Failed to create virtualenv '$PYTHON_ENV'"
+  if [$? -ne 0]; then
+    cecho_err "[-] Virtualenv already exists"
     exit 1
   fi
   cecho "[+] Virtualenv '$PYTHON_ENV' created"
@@ -180,6 +175,15 @@ install_ctk() {
   fi
   # or pip install -r requirements.txt
   cecho "[+] Python dependencies installed"
+
+  # Downloading Copyparty-Toolkit...
+  cecho "[*] Downloading Copyparty-Toolkit..."
+  git clone $REPO_URL "$INSTALL_DIR"
+  if [ $? -ne 0 ]; then
+    cecho_err "[!] Failed to download Copyparty-Toolkit"
+    exit 1
+  fi
+  cecho "[+] Copyparty-Toolkit downloaded successfully"
 
   # Download Copyparty 
   python3 $INSTALL_DIR/ctk.py update

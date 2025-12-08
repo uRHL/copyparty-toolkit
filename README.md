@@ -56,7 +56,7 @@
 
 ```bash
 apt update && apt install git curl
-bash https://github.com/uRHL/copyparty-toolkit/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/uRHL/copyparty-toolkit/refs/heads/main/install.sh | bash
 
 
 ```
