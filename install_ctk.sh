@@ -199,7 +199,7 @@ install_ctk() {
   cecho "[+] Copyparty-Toolkit downloaded successfully"
   
   # Update permissions so executables are listed
-  chmod u+x copyparty-toolkit/ctk.py copyparty-toolkit/copyparty-sfx.py copyparty-toolkit/install_ctk.sh
+  chmod ug+x copyparty-toolkit/ctk.py copyparty-toolkit/copyparty-sfx.py copyparty-toolkit/install_ctk.sh
 
   # Download Copyparty 
   python3 $INSTALL_DIR/ctk.py update

@@ -261,11 +261,16 @@ class CopypartyToolKit:
             return False
         cmd = ["copyparty-sfx.py", "-c", str(conf_path)]
         _log(f"[*] Running: {' '.join(cmd)}")
-        result = subprocess.run(cmd)
-        if result.returncode != 0:
-            _log(f"[!] copyparty-sfx exited with code {result.returncode}")
-            return False
-        return True
+        try:
+            result = subprocess.run(cmd)
+        except KeyboardInterrupt:
+            _log("[-] Copyparty stopped")
+            return True
+        else:
+            if result.returncode != 0:
+                _log(f"[!] copyparty-sfx exited with code {result.returncode}")
+                return False
+            return True
 
     def to_conf(self, path: str = None) -> str:
         def fmt_scalar(val):
