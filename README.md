@@ -1,5 +1,7 @@
 # Copyparty toolkit
 
+- https://github.com/cloudflare/cfssl
+
 `init` command creates the following dir structure in the provided `--root-dir` or cwd if none.
 ```bash
 /sharex
@@ -54,23 +56,39 @@
 ## Installing cp Toolkit
 
 ```bash
-# apt update && apt install git
-git clone https://user/repo.git
-bash auto_install.sh
+apt update && apt install git curl
+bash https://user/repo/install.sh | bash
+
+
 ```
 
 ## Installing Copyparty
 
 ```bash
 # AUTOINSTALL FROM DEBIAN 12
+
+INSTALL_DIR="$HOME/cp-toolkit"
+
+# Ensure system is up-to-date
+apt update && apt upgrade -y
+
+# Download tool
+git clone https://user/repo.git -d "$INSTALL_DIR"
+
 # Install dependencies
-apt update && apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl git libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev python3.11-venv
+apt update && apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl git libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev python3.11-venv -y
 
 # Download pyenv
 curl -fsSL https://pyenv.run | bash
 
 # Add pyenv to PATH
 echo -e "export PYENV_ROOT=\"$HOME/.pyenv\"\n[[ -d $PYENV_ROOT/bin ]] && export PATH=\"$PYENV_ROOT/bin:$PATH\"\neval \"$(pyenv init - bash)\"" | tee -a .bashrc
+
+# Download tool
+git clone https://user/repo.git
+
+# Add repo to path
+echo -e "\nexport PATH=\"$INSTALL_DIR:$PATH\"" | tee -a .bashrc
 
 # Reload virtual env
 source .bashrc
@@ -88,19 +106,16 @@ pyenv activate copyparty
 pip install argon2-cffi mutagen Pillow ffmpeg ffprobe rawpy pyftpdlib pyopenssl
 # or pip install -r requirements.txt
 
-# Download copyparty
-wget https://github.com/9001/copyparty/releases/latest/download/copyparty-sfx.py
+# Download Copyparty 
+python3 cp-toolkit.py update
 
-# 
+# Initialize vault
 python3 cp-toolkit.py init
+
+# Run Copyparty
 python3 copyparty-sfx.py -c /root/copyparty.conf
 
 ```
-
-Add a new subparser "update" which "Updates Copyparty SFX". It does the following:
-1. download https://github.com/9001/copyparty/releases/latest/download/copyparty-sfx.py into ROOT_DIR, appending ".tmp" to the file name so that current copyparty-sfx.py (if exists) is not overwriten.
-2. If file "copyparty-sfx.py" does not exist yet, print message "Successfully installed Copyparty <tmp.VER> then strip .tmp suffix from the file and return.
-2. If file "copyparty-sfx.py" already exists, compare the variable "VER" (moreless around line 26) of current "copyparty-sfx.py" against "VER" from "copyparty-sfx.py.tmp". If tmp.VER == current.VER, print message "Already at the newest version" and delete tmp file. If tmp.VER > current.VER, print message "Copyparty updated from <current.VER> to <tmp.VER>" then replace current "copyparty-sfx.py" by "copyparty-sfx.py.tmp", so that only the highest version "copyparty-sfx" is preserved.
 
 ## Requirements.txt
 
@@ -119,4 +134,23 @@ pyftpdlib==2.1.0
 pyOpenSSL==25.3.0
 rawpy==0.25.1
 typing_extensions==4.15.0
+```
+
+```bash
+I want you to create a new flag "--remove" which executes remove_dptk() function.
+That function does the following:
+
+```bash
+# TODO: prompt user to confirm uninstalling
+echo "[*] Uninstalling..."
+# Removing virtual environment
+pyenv virtualenv-delete $PYTHON_ENV
+# Uninstalling Python $PYTHON_VER
+pyenv uninstall $PYTHON_VER
+# Removing Copyparty and CPTK
+rm -fr $INSTALL_DIR
+echo "[+] Successfully uninstalled Copyparty and CPTK
+```
+
+I want you to implement the flag and function. Apply the same logging we are using for the rest of steps (print before, result)
 ```

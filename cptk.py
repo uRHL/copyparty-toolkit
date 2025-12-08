@@ -413,7 +413,7 @@ class CopypartyConf:
     def mkdirs(root_dir: str = None, reset: bool = False, confirm: bool = True) -> bool:
         root = os.path.abspath(root_dir) if root_dir else os.path.join(os.getenv('HOME', os.getcwd()), "partybox")
         conf_target = ROOT_DIR / "copyparty.conf"
-        conf_template = TEMPLATE_DIR / "cp.conf"
+        conf_template = TEMPLATE_DIR / "default.conf"
         if os.path.exists(root):
             is_empty = not any(os.scandir(root))
             if not is_empty:
@@ -571,6 +571,7 @@ def update_sfx():
     url = "https://github.com/9001/copyparty/releases/latest/download/copyparty-sfx.py"
     dest = ROOT_DIR / "copyparty-sfx.py"
     tmp = ROOT_DIR / "copyparty-sfx.py.tmp"
+    _log(f"[*] Updating Copyparty SFX...")
     try:
         with urllib.request.urlopen(url) as resp:
             tmp.write_bytes(resp.read())
