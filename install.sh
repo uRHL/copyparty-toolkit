@@ -110,6 +110,7 @@ install_ctk() {
   # Download pyenv
   cecho "[*] Installing pyenv"
   curl -fsSL https://pyenv.run | bash
+  echo "WTF $?"
   if [ $? -eq 127 ]; then
     cecho "[-] Package already installed"
   elif [ $? -ne 0 ]; then
