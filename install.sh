@@ -170,7 +170,7 @@ install_ctk() {
 
   # Activate virtual env
   cecho "[*] Activating virtualenv '$PYTHON_ENV'"
-  pyenv deactivate 2> /dev/null # Deactivate current env, if any
+  pyenv deactivate 2> /dev/null; source "$HOME/.bashrc" # Deactivate current env, if any
   pyenv activate $PYTHON_ENV
   if [ $? -ne 0 ]; then
     cecho_err "[!] Failed to activate virtualenv '$PYTHON_ENV'"
