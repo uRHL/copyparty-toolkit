@@ -1,0 +1,6 @@
+/Documents
+/Documents/00-tools
+/Documents/01-vm
+/Music
+/Pictures
+/Videos
