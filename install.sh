@@ -122,7 +122,7 @@ install_ctk() {
 
   # Add pyenv to PATH
   cecho "[*] Configuring pyenv PATH"
-  if [[ -z "$PYENV_ROOT" ]]; then
+  if [[ -z "$PYENV_ROOT" ]] || ! grep -q "export PYENV_ROOT=" "$HOME/.bashrc"; then
     echo "export PYENV_ROOT=\"$HOME/.pyenv\"" >> "$HOME/.bashrc"
     echo "[[ -d \$PYENV_ROOT/bin ]] && export PATH=\"\$PYENV_ROOT/bin:\$PATH\"" >> "$HOME/.bashrc"
     echo "eval \"\$(pyenv init - bash)\"" >> "$HOME/.bashrc"
