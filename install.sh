@@ -59,9 +59,9 @@ cecho_err() {
 
 remove_dptk() {
   cecho "[*] Uninstalling..."
-  export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init - bash)"
+  # export PYENV_ROOT="$HOME/.pyenv"
+  # export PATH="$PYENV_ROOT/bin:$PATH"
+  # eval "$(pyenv init - bash)"
   cecho "[*] Removing virtual environment '$PYTHON_ENV'"
   pyenv virtualenv-delete -f $PYTHON_ENV
   if [ $? -ne 0 ]; then
@@ -154,11 +154,15 @@ install_ctk() {
   # Create virtual env
   cecho "[*] Creating virtualenv '$PYTHON_ENV'"
   pyenv virtualenv $PYTHON_ENV
-  if [ $? -ne 0 ]; then
+  if [ $? -eq 1 ]; then
+    cecho "[-] Virtualenv '$PYTHON_ENV' already exists"
+  elif [ $? -ne 0 ]; then
     cecho_err "[!] Failed to create virtualenv '$PYTHON_ENV'"
     exit 1
+  else
+    cecho "[+] Virtualenv '$PYTHON_ENV' created"
   fi
-  cecho "[+] Virtualenv '$PYTHON_ENV' created"
+  
 
   # Activate virtual env
   cecho "[*] Activating virtualenv '$PYTHON_ENV'"
