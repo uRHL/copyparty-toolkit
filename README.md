@@ -56,7 +56,7 @@
 
 ```bash
 apt update && apt install git curl
-curl -fsSL https://raw.githubusercontent.com/uRHL/copyparty-toolkit/refs/heads/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/uRHL/copyparty-toolkit/refs/heads/main/install_ctk.sh | bash
 
 
 ```
@@ -90,21 +90,7 @@ rawpy==0.25.1
 typing_extensions==4.15.0
 ```
 
-```bash
-I want you to create a new flag "--remove" which executes remove_dptk() function.
-That function does the following:
 
-```bash
-# TODO: prompt user to confirm uninstalling
-echo "[*] Uninstalling..."
-# Removing virtual environment
-pyenv virtualenv-delete $PYTHON_ENV
-# Uninstalling Python $PYTHON_VER
-pyenv uninstall $PYTHON_VER
-# Removing Copyparty and CTK
-rm -fr $INSTALL_DIR
-echo "[+] Successfully uninstalled Copyparty and CTK
-```
+Add a new method to CopypartyConf class named "run()". This method just runs the following command: f"copyparty-sfx.py -c {ROOT_DIR/copyparty.conf}". Before doing it, check that ROOT_DIR/copyparty.conf exists.
 
-I want you to implement the flag and function. Apply the same logging we are using for the rest of steps (print before, result)
-```
+Additionally, a new subparser to ctk.py called "run" and its corresponding handler. Map it with the newly created method CopypartyConf.run()

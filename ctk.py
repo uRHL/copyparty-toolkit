@@ -1,13 +1,12 @@
+#!/usr/bin/env python3
+# coding: latin-1
+from packaging.version import Version as _Version
 from argon2.low_level import Type as ArgonType
-try:
-    from packaging.version import Version  # type: ignore
-    _Version = Version
-except ImportError:  # fallback for minimal environments
-    from distutils.version import LooseVersion as _Version  # type: ignore
 from argon2.low_level import hash_secret
 from pathlib import Path
 
 import urllib.request
+import subprocess
 import argparse
 import random
 import shutil
@@ -15,8 +14,10 @@ import re
 import os
 
 
+
 ROOT_DIR = Path(__file__).parent
 TEMPLATE_DIR = ROOT_DIR / "templates"
+DEFAULT_CONF = ROOT_DIR / 'copyparty.conf'
 
 # https://github.com/9001/copyparty/blob/c5c5f9b4b828b984cf7109d12f86150a334eb566/copyparty/pwhash.py#L110
 def _gen_argon2(salt: str, plain: str) -> str:
@@ -85,9 +86,6 @@ def gen_passwd(length: int = 12) -> str:
     charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
     return ''.join(random.choices(charset, k=length))
 
-def gen_password(length: int = 12) -> str:
-    return gen_passwd(length)
-
 def sanitize(value) -> str:
     return re.sub(r'[^a-z0-9_-]', '-', value)
 
@@ -115,14 +113,14 @@ def _prompt(message: str) -> str:
         return f"{color}{text}\033[0m"
     return text
 
-class CopypartyConf:
-    def __init__(self, global_conf=None, accounts=None, volumes=None, extra=None, groups=None, path: str = None):
+class CopypartyToolKit:
+    def __init__(self, global_conf=None, accounts=None, volumes=None, extra=None, groups=None, conf_path: str | Path = None):
         self._global = global_conf or {}
         self._accounts = accounts or {}
         self._volumes = volumes or {}
         self._extra = extra or {}
         self._groups = groups or {}
-        self._path = path
+        self._conf_path = str(conf_path)
 
     @property
     def salt(self) -> str | None:
@@ -149,15 +147,15 @@ class CopypartyConf:
         return self._extra
 
     @property
-    def path(self):
-        return self._path
+    def conf_path(self):
+        return self._conf_path
     
     @property
     def get_groups(self):
         return self._groups
 
     @staticmethod
-    def parse_conf(path: str = "copyparty.conf"):
+    def parse_conf(path: str | Path = DEFAULT_CONF):
         sections = {"global": {}, "accounts": {}, "volumes": {}, "extra": {}, "groups": {}}
         current = None
         block_name = None
@@ -240,21 +238,34 @@ class CopypartyConf:
                         target[k.strip()] = _parse_value(v.strip())
                     else:
                         target[text] = True
-        return CopypartyConf(
+        return CopypartyToolKit(
             global_conf=sections["global"],
             accounts=sections["accounts"],
             volumes=sections["volumes"],
             extra=sections["extra"],
             groups=sections["groups"],
-            path=path
+            conf_path=path
         )
 
     def _base_dir(self) -> Path:
         if self.vault_dir:
             return Path(self.vault_dir)
-        if self._path:
-            return Path(self._path).parent
+        if self._conf_path:
+            return Path(self._conf_path).parent
         return ROOT_DIR
+
+    def run(self) -> bool:
+        conf_path = DEFAULT_CONF
+        if not conf_path.exists():
+            _log(f"[!] Config file not found at {conf_path}")
+            return False
+        cmd = ["copyparty-sfx.py", "-c", str(conf_path)]
+        _log(f"[*] Running: {' '.join(cmd)}")
+        result = subprocess.run(cmd)
+        if result.returncode != 0:
+            _log(f"[!] copyparty-sfx exited with code {result.returncode}")
+            return False
+        return True
 
     def to_conf(self, path: str = None) -> str:
         def fmt_scalar(val):
@@ -317,7 +328,7 @@ class CopypartyConf:
                 lines.append("")
 
         conf_str = "\n".join(lines).rstrip() + "\n"
-        target_path = path or self._path
+        target_path = path or self._conf_path
         if target_path:
             base, ext = os.path.splitext(target_path)
             backup_path = f"{base}.bak{ext}"
@@ -328,10 +339,10 @@ class CopypartyConf:
         return conf_str
 
     def undo(self) -> bool:
-        if not self._path:
+        if not self._conf_path:
             return False
-        base, ext = os.path.splitext(self._path)
-        target_path = self._path
+        base, ext = os.path.splitext(self._conf_path)
+        target_path = self._conf_path
         backup_path = f"{base}.bak{ext}"
         if not os.path.exists(backup_path) or not os.path.exists(target_path):
             return False
@@ -405,7 +416,7 @@ class CopypartyConf:
         if sharex_dir.exists():
             shutil.rmtree(sharex_dir)
         _log(f"[+] Removed user '{username}' and associated data")
-        self.to_conf()
+        self.to_conf(path=self._conf_path)
         return True
 
     def reset_passwd(self, username: str) -> str:
@@ -415,13 +426,13 @@ class CopypartyConf:
             return ''
         new_password = gen_passwd()
         self._accounts[username] = new_password
-        self.to_conf()
+        self.to_conf(path=self._conf_path)
         return new_password
 
     @staticmethod
     def mkdirs(root_dir: str = None, reset: bool = False, confirm: bool = True) -> bool:
         root = os.path.abspath(root_dir) if root_dir else os.path.join(os.getenv('HOME', os.getcwd()), "partybox")
-        conf_target = ROOT_DIR / "copyparty.conf"
+        conf_target = DEFAULT_CONF
         conf_template = TEMPLATE_DIR / "default.conf"
         if os.path.exists(root):
             is_empty = not any(os.scandir(root))
@@ -466,7 +477,7 @@ class CopypartyConf:
         _create_from_file(TEMPLATE_DIR / 'public_account_struct.txt', os.path.join("home", "public"))
 
         if not conf_target.exists() and conf_template.exists():
-            salt = gen_password(24)
+            salt = gen_passwd(24)
             admin_hash = _gen_argon2(salt, 'admin')
             tpl = conf_template.read_text(encoding="utf-8")
             tpl = tpl.replace("%vaultdir%", root)
@@ -519,7 +530,7 @@ class CopypartyConf:
         sharex_dir = base_path / "sharex" / club_name
         sharex_dir.mkdir(parents=True, exist_ok=True)
         _log(f"[+] Created group '{gname}' with members: {', '.join(members) if members else '(none)'}")
-        self.to_conf()
+        self.to_conf(path=self._conf_path)
 
     def rm_group(self, groupname: str, *users: str, confirm: bool = True) -> bool:
         gname = sanitize(groupname)
@@ -536,7 +547,7 @@ class CopypartyConf:
                 new_members.discard(sanitize(u))
             self._groups[gname] = list(new_members)
             _log(f"[+] Removed members from group '{gname}': {', '.join(users)}")
-            self.to_conf()
+            self.to_conf(path=self._conf_path)
             return True
         if confirm:
             ans = input(_prompt(f"[*] Remove group '{gname}' and related volume? [y/N]: ")).strip().lower()
@@ -554,7 +565,7 @@ class CopypartyConf:
         if sharex_dir.exists():
             shutil.rmtree(sharex_dir)
         _log(f"[+] Removed group '{gname}' and associated data")
-        self.to_conf()
+        self.to_conf(path=self._conf_path)
         return True
 
 def _extract_ver(path: Path) -> str | None:
@@ -623,7 +634,7 @@ def _build_parser():
     p_init.add_argument("-d", "--root-dir", dest="root_dir", help="Root directory for the vault (default: ./partybox under cwd)")
 
     p_user = sub.add_parser("user", help="User operations")
-    p_user.add_argument("-c", "--config", default="copyparty.conf", help="Path to copyparty.conf")
+    p_user.add_argument("-c", "--config", default=str(DEFAULT_CONF), help="Path to copyparty.conf")
     user_sub = p_user.add_subparsers(dest="user_cmd", required=True)
     u_add = user_sub.add_parser("add", help="Create new user(s)")
     u_add.add_argument("users", nargs="+")
@@ -633,7 +644,7 @@ def _build_parser():
     u_rm.add_argument("users", nargs="+")
 
     p_group = sub.add_parser("group", help="Group operations")
-    p_group.add_argument("-c", "--config", default="copyparty.conf", help="Path to copyparty.conf")
+    p_group.add_argument("-c", "--config", default=str(DEFAULT_CONF), help="Path to copyparty.conf")
     group_sub = p_group.add_subparsers(dest="group_cmd", required=True)
     g_add = group_sub.add_parser("add", help="Create or extend a group")
     g_add.add_argument("groupname")
@@ -643,17 +654,18 @@ def _build_parser():
     g_rm.add_argument("users", nargs="*", help="Members to remove (empty to delete group)")
 
     p_update = sub.add_parser("update", help="Update Copyparty SFX")
+    sub.add_parser("run", help="Run Copyparty using copyparty.conf")
 
     return parser
 
 def main():
     args = _build_parser().parse_args()
     if args.cmd == "init":
-        CopypartyConf.mkdirs(root_dir=args.root_dir, reset=args.reset, confirm=True)
+        CopypartyToolKit.mkdirs(root_dir=args.root_dir, reset=args.reset, confirm=True)
         return
 
     if args.cmd == "user":
-        conf = CopypartyConf.parse_conf(args.config)
+        conf = CopypartyToolKit.parse_conf(args.config)
         if args.user_cmd == "add":
             for u in args.users:
                 pwd = conf.add_user(u)
@@ -670,7 +682,7 @@ def main():
         return
 
     if args.cmd == "group":
-        conf = CopypartyConf.parse_conf(args.config)
+        conf = CopypartyToolKit.parse_conf(args.config)
         if args.group_cmd == "add":
             conf.add_group(args.groupname, *args.users)
         elif args.group_cmd == "rm":
@@ -679,6 +691,11 @@ def main():
 
     if args.cmd == "update":
         update_sfx()
+        return
+
+    if args.cmd == "run":
+        conf = CopypartyToolKit.parse_conf(str(DEFAULT_CONF))
+        conf.run()
         return
 
 
