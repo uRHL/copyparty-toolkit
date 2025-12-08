@@ -123,11 +123,11 @@ install_ctk() {
   # Add pyenv to PATH
   cecho "[*] Configuring pyenv PATH"
   echo "export PYENV_ROOT=\"$HOME/.pyenv\"" >> "$HOME/.bashrc"
-  echo "[[ -d \\\$PYENV_ROOT/bin ]] && export PATH=\"\\\$PYENV_ROOT/bin:\\\$PATH\"" >> "$HOME/.bashrc"
-  echo "eval \"\\\$(pyenv init - bash)\"" >> "$HOME/.bashrc"
-  export PYENV_ROOT="$HOME/.pyenv"
-  export PATH="$PYENV_ROOT/bin:$PATH"
-  eval "$(pyenv init - bash)"
+  echo "[[ -d \$PYENV_ROOT/bin ]] && export PATH=\"\$PYENV_ROOT/bin:\$PATH\"" >> "$HOME/.bashrc"
+  echo "eval \"\$(pyenv init - bash)\"" >> "$HOME/.bashrc"
+  # export PYENV_ROOT="$HOME/.pyenv"
+  # export PATH="$PYENV_ROOT/bin:$PATH"
+  # eval "$(pyenv init - bash)"
   cecho "[+] pyenv PATH configured"
 
   # Reload shell env
