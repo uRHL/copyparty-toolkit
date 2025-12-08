@@ -151,8 +151,8 @@ install_ctk() {
   # Create virtual env
   cecho "[*] Creating virtualenv '$PYTHON_ENV'"
   pyenv virtualenv $PYTHON_ENV
-  if [$? -ne 0]; then
-    cecho_err "[-] Virtualenv already exists"
+  if [ $? -ne 0 ]; then
+    cecho_err "[!] Failed to create virtualenv '$PYTHON_ENV'"
     exit 1
   fi
   cecho "[+] Virtualenv '$PYTHON_ENV' created"
