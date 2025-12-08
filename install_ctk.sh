@@ -199,14 +199,15 @@ install_ctk() {
   cecho "[+] Copyparty-Toolkit downloaded successfully"
   
   # Update permissions so executables are listed
-  chmod ug+x copyparty-toolkit/ctk.py copyparty-toolkit/copyparty-sfx.py copyparty-toolkit/install_ctk.sh
+  chmod ug+x $INSTALL_DIR/ctk.py $INSTALL_DIR/install_ctk.sh
 
   # Download Copyparty 
   python3 $INSTALL_DIR/ctk.py update
+  chmod ug+x $INSTALL_DIR/copyparty-sfx.py
   echo ""
   cecho "[*] Next steps:"
-  cecho "[*] 1. Init config:             python3 ctk.py init"
-  cecho "[*] 2. Run Copyparty:           python3 copyparty-sfx.py -c copyparty.conf"
+  cecho "[*] 1. Init config:             ctk.py init"
+  cecho "[*] 2. Run Copyparty:           ctk.py run"
 }
 
 # If remove flag set, perform uninstall and exit
