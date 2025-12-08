@@ -31,7 +31,6 @@
   accs:
     A: user
     r: @acct
-
 [/user]
   ./home/user
   accs:
@@ -57,63 +56,18 @@
 
 ```bash
 apt update && apt install git curl
-bash https://user/repo/install.sh | bash
+bash https://github.com/uRHL/copyparty-toolkit/install.sh | bash
 
 
 ```
 
-## Installing Copyparty
+## Getting started with Copyparty
 
 ```bash
-# AUTOINSTALL FROM DEBIAN 12
-
-INSTALL_DIR="$HOME/cp-toolkit"
-
-# Ensure system is up-to-date
-apt update && apt upgrade -y
-
-# Download tool
-git clone https://user/repo.git -d "$INSTALL_DIR"
-
-# Install dependencies
-apt update && apt install make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl git libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev python3.11-venv -y
-
-# Download pyenv
-curl -fsSL https://pyenv.run | bash
-
-# Add pyenv to PATH
-echo -e "export PYENV_ROOT=\"$HOME/.pyenv\"\n[[ -d $PYENV_ROOT/bin ]] && export PATH=\"$PYENV_ROOT/bin:$PATH\"\neval \"$(pyenv init - bash)\"" | tee -a .bashrc
-
-# Download tool
-git clone https://user/repo.git
-
-# Add repo to path
-echo -e "\nexport PATH=\"$INSTALL_DIR:$PATH\"" | tee -a .bashrc
-
-# Reload virtual env
-source .bashrc
-
-# Install python
-pyenv install 3.13.0
-
-# Create virtual env
-pyenv virtualenv copyparty
-
-# Activate virtual env
-pyenv activate copyparty
-
-# Install dependencies for: pw-hashing, thumbnails, audio and video, raw images, SFTP
-pip install argon2-cffi mutagen Pillow ffmpeg ffprobe rawpy pyftpdlib pyopenssl
-# or pip install -r requirements.txt
-
-# Download Copyparty 
-python3 cp-toolkit.py update
-
-# Initialize vault
-python3 cp-toolkit.py init
-
-# Run Copyparty
-python3 copyparty-sfx.py -c /root/copyparty.conf
+python3 toolkit.py init
+python3 toolkit.py user add "User Name" # Creates user 'user-name' and correspoding shares
+python3 toolkit.py group add group-name "user-name" # Add user-name to group
+python toolkit.py group rm group-name "user-name" # Remove user-name from group
 
 ```
 
@@ -147,9 +101,9 @@ echo "[*] Uninstalling..."
 pyenv virtualenv-delete $PYTHON_ENV
 # Uninstalling Python $PYTHON_VER
 pyenv uninstall $PYTHON_VER
-# Removing Copyparty and CPTK
+# Removing Copyparty and CTK
 rm -fr $INSTALL_DIR
-echo "[+] Successfully uninstalled Copyparty and CPTK
+echo "[+] Successfully uninstalled Copyparty and CTK
 ```
 
 I want you to implement the flag and function. Apply the same logging we are using for the rest of steps (print before, result)

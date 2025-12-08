@@ -1,5 +1,9 @@
 from argon2.low_level import Type as ArgonType
-from distutils.version import LooseVersion
+try:
+    from packaging.version import Version  # type: ignore
+    _Version = Version
+except ImportError:  # fallback for minimal environments
+    from distutils.version import LooseVersion as _Version  # type: ignore
 from argon2.low_level import hash_secret
 from pathlib import Path
 
@@ -158,8 +162,13 @@ class CopypartyConf:
         current = None
         block_name = None
         block_indent = 0
-        with open(path, encoding="utf-8") as fh:
-            lines = fh.readlines()
+        lines = None
+        try:
+            with open(path, encoding="utf-8") as fh:
+                lines = fh.readlines()
+        except FileNotFoundError:
+            _log(f"[-] Copyparty conf is missing. Run ctk.py init to initialize it")
+            exit(1)
         if not lines:
             raise ValueError("Config file syntax is not correct")
         for raw in lines:
@@ -592,7 +601,7 @@ def update_sfx():
 
     cur_ver = _extract_ver(dest) or "0"
     try:
-        newer = LooseVersion(tmp_ver) > LooseVersion(cur_ver)
+        newer = _Version(tmp_ver) > _Version(cur_ver)
     except Exception:
         newer = tmp_ver > cur_ver
 
@@ -606,7 +615,7 @@ def update_sfx():
 
 
 def _build_parser():
-    parser = argparse.ArgumentParser(description="Copyparty toolkit")
+    parser = argparse.ArgumentParser(prog=Path(__file__).stem, description="Copyparty ToolKit")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     p_init = sub.add_parser("init", help="Initialize vault structure")

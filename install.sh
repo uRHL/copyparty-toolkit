@@ -2,7 +2,7 @@
 
 # Auto-Install Copyparty-Toolkit (debian 12)
 
-REPO_URL="https://user/repo.git"
+REPO_URL="https://github.com/uRHL/copyparty-toolkit.git"
 INSTALL_DIR="$HOME/copyparty-toolkit"
 PYTHON_VER="3.13.0"
 PYTHON_ENV="copyparty"
@@ -14,7 +14,7 @@ Usage: $0 [-v|--verbose] [--remove] [-h|--help]
 Options:
   -v, --verbose   Show command output (default: quiet)
   -h, --help      Show this help message
-  --remove        Uninstall Copyparty and CPTK
+  --remove        Uninstall Copyparty and CTK
 EOF
 }
 
@@ -78,17 +78,17 @@ remove_dptk() {
   fi
   cecho "[+] Uninstalled Python $PYTHON_VER"
 
-  cecho "[*] Removing Copyparty and CPTK from '$INSTALL_DIR'"
+  cecho "[*] Removing Copyparty and CTK from '$INSTALL_DIR'"
   rm -fr \"$INSTALL_DIR\"
   if [ $? -ne 0 ]; then
     cecho_err "[!] Failed to remove '$INSTALL_DIR'"
     exit 1
   fi
-  cecho "[+] Successfully uninstalled Copyparty and CPTK"
+  cecho "[+] Successfully uninstalled Copyparty and CTK"
   exit 0
 }
 
-install_cptk() {
+install_ctk() {
   # Ensure system is up-to-date
   cecho "[*] Ensuring system is up to date"
   apt update && apt upgrade -y > /dev/null
@@ -171,9 +171,9 @@ install_cptk() {
   fi
   cecho "[+] Virtualenv '$PYTHON_ENV' activated"
 
-  # Install dependencies for: pw-hashing, thumbnails, audio and video, raw images, SFTP
+  # Install dependencies for: pw-hashing, thumbnails, audio and video, raw images, SFTP and version numbers
   cecho "[*] Installing Python dependencies"
-  pip install argon2-cffi mutagen Pillow ffmpeg ffprobe rawpy pyftpdlib pyopenssl
+  pip install argon2-cffi mutagen Pillow ffmpeg ffprobe rawpy pyftpdlib pyopenssl packaging
   if [ $? -ne 0 ]; then
     cecho_err "[!] Failed to install Python dependencies"
     exit 1
@@ -182,7 +182,7 @@ install_cptk() {
   cecho "[+] Python dependencies installed"
 
   # Download Copyparty 
-  python3 $INSTALL_DIR/cp-toolkit.py update
+  python3 $INSTALL_DIR/ctk.py update
   echo ""
   cecho "[*] Next steps:"
   cecho "[*] 1. Initialize Copyparty conf: python3 cp-toolkit.py init"
@@ -191,7 +191,7 @@ install_cptk() {
 
 # If remove flag set, perform uninstall and exit
 if [[ $DO_REMOVE -eq 1 ]]; then
-  read -rp "[*] Are you sure you want to uninstall Copyparty and CPTK? [y/N]: " ans
+  read -rp "[*] Are you sure you want to uninstall Copyparty and CTK? [y/N]: " ans
   ans=${ans,,}
   if [[ $ans == y* ]]; then
     remove_dptk
@@ -200,5 +200,5 @@ if [[ $DO_REMOVE -eq 1 ]]; then
     exit 0
   fi
 else
-  install_cptk
+  install_ctk
 fi
