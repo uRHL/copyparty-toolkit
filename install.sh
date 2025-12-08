@@ -126,7 +126,7 @@ install_ctk() {
     echo "export PYENV_ROOT=\"\$HOME/.pyenv\"" >> "$HOME/.bashrc"
     echo "[[ -d \$PYENV_ROOT/bin ]] && export PATH=\"\$PYENV_ROOT/bin:\$PATH\"" >> "$HOME/.bashrc"
     echo "eval \"\$(pyenv init - bash)\"" >> "$HOME/.bashrc"
-    echo "export PATH=\"$INSTALLATION_DIR/:\$PATH\"" >> "$HOME/.bashrc" # Add install dir to PATH
+    echo "export PATH=\"$INSTALL_DIR/:\$PATH\"" >> "$HOME/.bashrc" # Add install dir to PATH
     cecho "[+] pyenv PATH configured"
   else
     cecho "[-] PYENV_ROOT already set, skipping PATH configuration"
