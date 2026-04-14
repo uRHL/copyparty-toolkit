@@ -1,0 +1,54 @@
+[Unit]
+Description=Copyparty File Server (Hardened)
+After=network.target
+
+[Service]
+Type=notify
+SyslogIdentifier=copyparty
+Environment=PYTHONUNBUFFERED=1
+ExecReload=/bin/kill -s USR1 $MAINPID
+
+User=copyparty
+Group=copyparty
+
+WorkingDirectory=/var/lib/copyparty
+Environment=XDG_CONFIG_HOME=/var/lib/copyparty/.config
+
+ExecStart=/usr/bin/python3 /usr/local/bin/copyparty-sfx.py -c /etc/copyparty.conf
+
+Restart=on-failure
+RestartSec=5
+
+# ---- SECURITY HARDENING ----
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectHostname=true
+ProtectClock=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RemoveIPC=true
+MemoryDenyWriteExecute=true
+
+# Give access only to required runtime dir
+ReadWritePaths=/var/lib/copyparty
+
+# If your file volumes are not under /var/lib/copyparty
+# you must add their directories, e.g.:
+# ReadWritePaths=/srv/media
+# ReadWritePaths=/home/share
+
+# Prevent access to most of /proc (systemd v249+)
+ProtectProc=invisible
+
+# Uncomment ONLY if binding to port 80/443:
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

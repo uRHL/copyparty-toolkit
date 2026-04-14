@@ -1,0 +1,52 @@
+# /etc/systemd/system/copyparty.service
+[Unit]
+Description=Copyparty file server
+After=network.target
+
+[Service]
+# Type=notify means copyparty will notify systemd when ready to accept connections
+Type=notify
+
+SyslogIdentifier=copyparty
+Environment=PYTHONUNBUFFERED=1
+
+# Reloading config without full restart: send USR1 to main process
+ExecReload=/bin/kill -s USR1 $MAINPID
+
+PermissionsStartOnly=true
+
+# Run as an unprivileged user (recommended). Replace <COPYPARTY_USER> with real user.
+User=copyparty
+Group=copyparty
+
+# Working directory, and config dir (adjust if you used a different layout)
+WorkingDirectory=/var/lib/copyparty
+Environment=XDG_CONFIG_HOME=/var/lib/copyparty/.config
+
+# Optional: allow binding to lower ports (80, 443) — uncomment if needed
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+# Optional hardening — comment out if you encounter permission or functionality issues
+# ProtectClock=true
+# ProtectControlGroups=true
+# ProtectHostname=true
+# ProtectKernelLogs=true
+# ProtectKernelModules=true
+# ProtectKernelTunables=true
+# ProtectProc=invisible
+# RemoveIPC=true
+# RestrictNamespaces=true
+# RestrictRealtime=true
+# RestrictSUIDSGID=true
+
+# LogsDirectory (if you want copyparty-specific log folder under /var/log)
+# LogsDirectory=copyparty
+
+# ExecStart — full path to python + copyparty script, with config
+ExecStart=/usr/bin/python3 /usr/local/bin/copyparty-sfx.py -c /etc/copyparty.conf
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

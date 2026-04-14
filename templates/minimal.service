@@ -1,0 +1,28 @@
+[Unit]
+Description=Copyparty File Server
+After=network.target
+
+[Service]
+Type=notify
+SyslogIdentifier=copyparty
+Environment=PYTHONUNBUFFERED=1
+
+# Reload config without restart
+ExecReload=/bin/kill -s USR1 $MAINPID
+
+# Run as dedicated unprivileged user
+User=copyparty
+Group=copyparty
+
+# Runtime directory
+WorkingDirectory=/var/lib/copyparty
+Environment=XDG_CONFIG_HOME=/var/lib/copyparty/.config
+
+# Path to the Copyparty script + config
+ExecStart=/usr/bin/python3 /usr/local/bin/copyparty-sfx.py -c /etc/copyparty.conf
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

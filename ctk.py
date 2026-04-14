@@ -17,7 +17,7 @@ import os
 
 ROOT_DIR = Path(__file__).parent
 TEMPLATE_DIR = ROOT_DIR / "templates"
-DEFAULT_CONF = ROOT_DIR / 'copyparty.conf'
+DEFAULT_CONF = Path('/etc') / 'copyparty.conf'
 
 # https://github.com/9001/copyparty/blob/c5c5f9b4b828b984cf7109d12f86150a334eb566/copyparty/pwhash.py#L110
 def _gen_argon2(salt: str, plain: str) -> str:
@@ -594,8 +594,8 @@ def _extract_ver(path: Path) -> str | None:
 
 def update_sfx():
     url = "https://github.com/9001/copyparty/releases/latest/download/copyparty-sfx.py"
-    dest = ROOT_DIR / "copyparty-sfx.py"
-    tmp = ROOT_DIR / "copyparty-sfx.py.tmp"
+    dest = Path('/usr/local/bin') / "copyparty-sfx.py"
+    tmp = Path('/usr/local/bin') / "copyparty-sfx.py.tmp"
     _log(f"[*] Updating Copyparty SFX...")
     try:
         with urllib.request.urlopen(url) as resp:
