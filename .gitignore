@@ -2,3 +2,7 @@
 __pycache__/*
 copyparty-sfx.py
 copyparty.*
+
+
+remote.git
+*venv/
